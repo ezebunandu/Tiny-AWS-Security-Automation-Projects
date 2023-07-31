@@ -1,0 +1,6 @@
+# Ignore terraform state files
+*/terraform.tfstate
+*/terraform.tfstate.*
+
+# Ignore any hidden file
+*.
