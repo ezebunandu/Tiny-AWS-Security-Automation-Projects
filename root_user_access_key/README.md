@@ -1,3 +1,3 @@
-### Root User Access Key Detection
+### Root User Access Key Creation Detection
 
-Using Amazon EventBridge to Detect When the Root User Access Key is being used
+Using CloudWatch Events to Detect When An Access Key is Created for the Root User
