@@ -69,3 +69,16 @@ resource "aws_cloudwatch_event_target" "lambda_event_target" {
   rule = aws_cloudwatch_event_rule.cloudtrail_event_rule.name
   arn  = aws_lambda_function.root_user_access_key_detector.arn
 }
+
+# Create an SNS topic for notifications
+resource "aws_sns_topic" "root_user_access_key_topic" {
+  name         = "RootUserAccessKeyTopic"
+  display_name = "Root User Access Key Usage Alerts"
+}
+
+# Optional: Subscribe an email endpoint to the SNS topic (replace with your email address)
+resource "aws_sns_topic_subscription" "email_subscription" {
+  topic_arn = aws_sns_topic.root_user_access_key_topic.arn
+  protocol  = "email"
+  endpoint  = "samuel.ezebunandu@outlook.com"
+}
