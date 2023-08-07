@@ -106,4 +106,12 @@ resource "aws_cloudwatch_event_target" "lambda_event_target" {
   rule      = aws_cloudwatch_event_rule.root_user_create_access_key_rule.name
   arn       = aws_lambda_function.root_user_access_key_creation_detector.arn
   target_id = "RootUserLambdaTarget"
+
+  dead_letter_config {
+    arn = aws_sqs_queue.cloudwatch_dead_letter_queue.arn
+  }
+}
+
+resource "aws_sqs_queue" "cloudwatch_dead_letter_queue" {
+  name = "CloudWatchEventsDeadLetterQueue"
 }
