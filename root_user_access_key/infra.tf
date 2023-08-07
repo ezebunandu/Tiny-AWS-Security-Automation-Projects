@@ -56,8 +56,6 @@ resource "aws_lambda_function" "root_user_access_key_creation_detector" {
   source_code_hash = filebase64sha256("lambda_function.zip") # Replace with the path to your Lambda function code
 }
 
-# To-Do: Rewrite the attachment for the CloudWatch Event Rule to the Lambda
-
 # Create an SNS topic for notifications
 resource "aws_sns_topic" "root_user_access_key_topic" {
   name         = "RootUserAccessKeyTopic"
@@ -92,4 +90,20 @@ resource "aws_iam_policy" "sns_publish_policy" {
 resource "aws_iam_role_policy_attachment" "lambda_sns_publish_attachment" {
   policy_arn = aws_iam_policy.sns_publish_policy.arn
   role       = aws_iam_role.lambda_role.name
+}
+
+# Allows the cloudwatch event be able to trigger the Lambda function
+resource "aws_lambda_permission" "event_rule_permission" {
+  statement_id  = "AllowExecutionFromCloudWatchEvent"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.root_user_access_key_creation_detector.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.root_user_create_access_key_rule.arn
+}
+
+# Attach the Lambda function to the CloudWatch Event Rule as a target
+resource "aws_cloudwatch_event_target" "lambda_event_target" {
+  rule      = aws_cloudwatch_event_rule.root_user_create_access_key_rule.name
+  arn       = aws_lambda_function.root_user_access_key_creation_detector.arn
+  target_id = "RootUserLambdaTarget"
 }
