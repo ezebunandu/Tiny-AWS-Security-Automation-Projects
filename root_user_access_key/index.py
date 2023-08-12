@@ -24,7 +24,7 @@ def lambda_handler(event, context):
             # and dynamically fetch the sns topic using tags here to avoid
             # this dirty mess of a hard-coded sns topic
             sns_client.publish(
-                TopicArn="arn:aws:sns:us-east-1:331806078927:RootUserAccessKeyTopic",
+                TopicArn="arn:aws:sns:us-east-1:553829288701:RootUserAccessKeyTopic",
                 Message=email_body,
                 Subject=email_subject,
             )

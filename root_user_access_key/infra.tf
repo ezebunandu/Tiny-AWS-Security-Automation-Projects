@@ -1,7 +1,7 @@
 # To-Do: Maybe can use a remote state file to avoid the mess below
 provider "aws" {
   shared_credentials_files = ["~/.aws/credentials"]
-  profile                  = "sec510-2"
+  profile                  = "monica"
   region                   = "us-east-1" # Replace with your desired region
 }
 
@@ -13,6 +13,7 @@ resource "aws_cloudwatch_event_rule" "root_user_create_access_key_rule" {
   event_pattern = jsonencode({
     "source" : ["aws.iam"],
     "detail" : {
+      "eventSource" : ["iam.amazonaws.com"],
       "eventName" : ["CreateAccessKey"],
       "userIdentity" : {
         "type" : ["Root"]
@@ -107,11 +108,4 @@ resource "aws_cloudwatch_event_target" "lambda_event_target" {
   arn       = aws_lambda_function.root_user_access_key_creation_detector.arn
   target_id = "RootUserLambdaTarget"
 
-  dead_letter_config {
-    arn = aws_sqs_queue.cloudwatch_dead_letter_queue.arn
-  }
-}
-
-resource "aws_sqs_queue" "cloudwatch_dead_letter_queue" {
-  name = "CloudWatchEventsDeadLetterQueue"
 }
