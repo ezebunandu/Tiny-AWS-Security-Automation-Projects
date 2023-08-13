@@ -66,7 +66,7 @@ resource "aws_sns_topic" "root_user_access_key_topic" {
 resource "aws_sns_topic_subscription" "email_subscription" {
   topic_arn = aws_sns_topic.root_user_access_key_topic.arn
   protocol  = "email"
-  endpoint  = "samuel.ezebunandu@outlook.com"
+  endpoint  = "samuel.ezebunandu@outlook.com" # change this to the email you want to subscribe to the topic
 }
 
 # iam policy to allow the lambda publish to the sns topic
@@ -74,14 +74,21 @@ resource "aws_iam_policy" "sns_publish_policy" {
   name = "SNSPublishPolicy"
 
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version = "2012-10-17",
     Statement = [
       {
         Effect = "Allow",
         Action = [
           "sns:Publish"
         ],
-        Resource = aws_sns_topic.root_user_access_key_topic.arn # Replace with the ARN of your SNS topic
+        Resource = aws_sns_topic.root_user_access_key_topic.arn
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "sns:CreateTopic"
+        ],
+        Resource = "*"
       }
     ]
   })

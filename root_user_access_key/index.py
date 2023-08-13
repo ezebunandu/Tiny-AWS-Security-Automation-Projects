@@ -18,13 +18,13 @@ def lambda_handler(event, context):
             email_subject = (
                 "Alert: Root User Access Key Creation Detected and Access Key Deleted"
             )
-            email_body = f"An access key was created for the root user. Please investigate immediately."
+            email_body = "An access key was created for the root user. Please investigate immediately."
 
-            # To-Do: Create tags in the Terraform resource for the sns topic
-            # and dynamically fetch the sns topic using tags here to avoid
-            # this dirty mess of a hard-coded sns topic
+            # https://stackoverflow.com/questions/71088521/how-can-i-get-the-sns-topic-arn-using-the-topic-name-to-publish-a-sns-message-in
+            topic = sns_client.create_topic(Name="RootUserAccessKeyTopic")
+            topic_arn = topic["TopicArn"]
             sns_client.publish(
-                TopicArn="arn:aws:sns:us-east-1:553829288701:RootUserAccessKeyTopic",
+                TopicArn=topic_arn,
                 Message=email_body,
                 Subject=email_subject,
             )
