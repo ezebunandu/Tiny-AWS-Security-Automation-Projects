@@ -34,6 +34,12 @@ resource "aws_sns_topic" "iam-config-change-monitor" {
   name = "iam-config-change-monitor-topic"
 }
 
+resource "aws_sns_topic_subscription" "email_subscription" {
+  topic_arn = aws_sns_topic.iam-config-change-monitor.arn
+  protocol  = "email"
+  endpoint  = "samuel.ezebunandu@outlook.com" # change this to the email you want to subscribe to the topic
+}
+
 resource "aws_sns_topic_policy" "cloudwatch-event" {
   arn    = aws_sns_topic.iam-config-change-monitor.arn
   policy = data.aws_iam_policy_document.sns_topic_policy.json
