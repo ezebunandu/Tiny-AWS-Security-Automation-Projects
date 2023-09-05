@@ -10,15 +10,9 @@ resource "aws_cloudwatch_event_rule" "iam-config-change-monitor" {
     "detail" : {
       "eventSource" : ["iam.amazonaws.com"],
       "eventName" : [
-        { "prefix" : "Put" },
-        { "prefix" : "Attach" },
-        { "prefix" : "Detach" },
-        { "prefix" : "Create" },
-        { "prefix" : "Update" },
-        { "prefix" : "Upload" },
-        { "prefix" : "Delete" },
-        { "prefix" : "Remove" },
-        { "prefix" : "Set" }
+        "CreateAccessKey",
+        "CreateLoginProfile",
+        "UpdateAssumeRolePolicy"
       ]
     }
   })

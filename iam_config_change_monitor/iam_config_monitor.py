@@ -1,5 +1,6 @@
 import boto3
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -40,13 +41,14 @@ def lambda_handler(event, context):
         account = event["account"]
         event = detail["eventName"]
 
-        logger.info(f"{event} event detected.")
-        topic = get_sns_topic_arn(SNS_TOPIC_NAME)
-        notify_admin(topic=topic, event=event, account=account)
-        logger.info("Notified the admin")
-
     except Exception as e:
         logger.error(f"{e}")
+        raise e
+
+    logger.info(f"{event} event detected.")
+    topic = get_sns_topic_arn(SNS_TOPIC_NAME)
+    notify_admin(topic=topic, event=event, account=account)
+    logger.info("Notified the admin")
 
     return {
         "statusCode": 200,
