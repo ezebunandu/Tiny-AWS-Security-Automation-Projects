@@ -47,6 +47,29 @@ resource "aws_iam_policy_attachment" "lambda_policy_attachment" {
   roles      = [aws_iam_role.lambda_role.name]
 }
 
+resource "aws_iam_policy" "update_access_key_policy" {
+  name = "UpdateAccessKeyPolicy"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "iam:UpdateAccessKey"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy_attachment" "update_access_key_attachment" {
+  name       = "UpdateAccessKeyAttachment"
+  policy_arn = aws_iam_policy.update_access_key_policy.arn
+  roles      = [aws_iam_role.lambda_role.name]
+}
+
 # Create the Lambda function
 resource "aws_lambda_function" "root_user_access_key_creation_detector" {
   filename         = "lambda_function.zip" # Replace with the path to your Lambda function code

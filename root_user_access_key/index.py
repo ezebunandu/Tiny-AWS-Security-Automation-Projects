@@ -18,6 +18,19 @@ def get_sns_topic_arn(name):
     return topic["TopicArn"]
 
 
+def disable_root_user_access_key(access_key_id, username):
+    iam_client = boto3.client("iam")
+    response = iam_client.update_access_key(
+        AccessKeyId=access_key_id, UserName=username, Status="Inactive"
+    )
+
+    if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
+        logger.info(f"Access key successfully disabled - {response}")
+    else:
+        logger.error(f"Error disabling access key - {response}")
+    return response
+
+
 def notify_admin(topic):
     sns_client = boto3.client("sns")
     response = sns_client.publish(
@@ -34,8 +47,7 @@ def notify_admin(topic):
     return response
 
 
-def lambda_handler(event, context):
-    # Verify that the event contains "CreateAccessKey" API event for the root user
+def lambda_handler(event, context):  # sourcery skip: extract-method
     try:
         detail = event["detail"]
 
@@ -43,8 +55,10 @@ def lambda_handler(event, context):
             detail["eventName"] == "CreateAccessKey"
             and detail["userIdentity"]["type"] == "Root"
         ):
+            access_key_id = detail["responseElements"]["accessKey"]["accessKeyId"]
             logger.info("An access key was created for the root user")
             topic = get_sns_topic_arn(SNS_TOPIC_NAME)
+            disable_root_user_access_key(access_key_id=access_key_id, username="Root")
             notify_admin(topic=topic)
             logger.info("Notified the admin")
 
