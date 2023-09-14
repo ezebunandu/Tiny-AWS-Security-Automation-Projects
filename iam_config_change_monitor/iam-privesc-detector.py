@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-SNS_TOPIC_NAME = "iam-config-change-monitor-topic"
+SNS_TOPIC_NAME = "iam-privesc-detector-monitor-topic"
 
 
 def get_sns_topic_arn(name):
@@ -18,13 +18,13 @@ def get_sns_topic_arn(name):
     return topic["TopicArn"]
 
 
-def notify_admin(topic, event, account):
+def notify_admin(topic, event, account, username):
     sns_client = boto3.client("sns")
     response = sns_client.publish(
         TargetArn=topic,
-        Subject="Alert: IAM Configuration Change Detected",
-        Message=f"""There has been a {event} change in the IAM configuration in the {account} AWS account.
-        Please investigate immediately""",
+        Subject="Potential IAM PrivEsc Event Detected",
+        Message=f"""There has been a `{event}` event for user `{username}` in the `{account}` AWS account.
+Please investigate immediately""",
     )
 
     if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
@@ -39,15 +39,16 @@ def lambda_handler(event, context):
     try:
         detail = event["detail"]
         account = event["account"]
-        event = detail["eventName"]
+        event_name = detail["eventName"]
+        user_name = detail["requestParameters"]["userName"]
 
     except Exception as e:
         logger.error(f"{e}")
         raise e
 
-    logger.info(f"{event} event detected.")
+    logger.info(f"{event_name} event detected.")
     topic = get_sns_topic_arn(SNS_TOPIC_NAME)
-    notify_admin(topic=topic, event=event, account=account)
+    notify_admin(topic=topic, event=event_name, account=account, username=user_name)
     logger.info("Notified the admin")
 
     return {
