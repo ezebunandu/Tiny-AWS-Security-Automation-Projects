@@ -1,3 +1,19 @@
+variable "sns_subscription_email" {
+  description = "The email address you want to subscribe to the detection alerts"
+  type        = string
+  default     = "samuel.ezebunandu@outlook.com" # change this to the email you want to subscribe
+}
+
+variable "privilege_escalation_actions_to_detect" {
+  description = "The list of privesc actions to detect"
+  type        = list(string)
+  default = [
+    "CreateAccessKey",
+    "CreateLoginProfile",
+    "UpdateLoginProfile",
+    "AddUserToGroup",
+  ]
+}
 resource "aws_cloudwatch_event_rule" "iam-privesc-detector" {
   name        = "iam-config-changes-rule"
   description = "Monitor for IAM configuration changes"
@@ -9,12 +25,7 @@ resource "aws_cloudwatch_event_rule" "iam-privesc-detector" {
     ],
     "detail" : {
       "eventSource" : ["iam.amazonaws.com"],
-      "eventName" : [
-        "CreateAccessKey",
-        "CreateLoginProfile",
-        "UpdateAssumeRolePolicy"
-      ]
-    }
+    "eventName" : var.privilege_escalation_actions_to_detect }
   })
 }
 
@@ -71,6 +82,8 @@ resource "aws_iam_policy" "publish-to-sns" {
         ],
         Resource = aws_sns_topic.iam-privesc-detector.arn
       },
+      # this is necessitated by the hacky way
+      # the lambda function gets the arn of the sns topic
       {
         Effect = "Allow",
         Action = [
@@ -106,5 +119,5 @@ resource "aws_sns_topic" "iam-privesc-detector" {
 resource "aws_sns_topic_subscription" "email_subscription" {
   topic_arn = aws_sns_topic.iam-privesc-detector.arn
   protocol  = "email"
-  endpoint  = "samuel.ezebunandu@outlook.com" # change this to the email you want to subscribe to the topic
+  endpoint  = var.sns_subscription_email
 }
