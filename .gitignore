@@ -1,6 +1,13 @@
 # Ignore terraform state files
+*.tfstate
 */terraform.tfstate
 */terraform.tfstate.*
 
 # Ignore any hidden file
 *.
+
+# Ignore hidden folders
+.*
+
+# Ignore zip files for lambdas
+*/*.zip
